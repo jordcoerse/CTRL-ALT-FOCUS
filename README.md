@@ -44,7 +44,7 @@ Download the latest release for your platform from the [Releases](https://github
 1. Clone this repository:
 ```bash
 git clone https://github.com/jordcoerse/CTRL-ALT-FOCUS.git
-cd sauce-boss
+cd ctrlaltfocus
 ```
 
 2. Install dependencies:
