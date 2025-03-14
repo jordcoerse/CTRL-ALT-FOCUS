@@ -5,7 +5,9 @@
 
 A stylish, customizable Pomodoro timer application to boost your productivity and focus. Built with Electron and React.
 
-![image](https://github.com/user-attachments/assets/471f3fb5-b434-485d-a525-ba0e865b0661)
+![image](https://github.com/user-attachments/assets/ded1e386-b9bc-4beb-8219-f573c93fb82b)![image](https://github.com/user-attachments/assets/83dbddd5-e256-4cd9-a37e-ae99a97ce155)
+
+
 
 
 ## 🍅 What is the Pomodoro Technique?
