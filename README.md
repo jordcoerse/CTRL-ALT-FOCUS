@@ -39,12 +39,14 @@ Feel free to adjust the times to what works best for you and your work rhythm.
 
 Download the latest release for your platform from the [Releases](https://github.com/jordcoerse/CTRL-ALT-FOCUS/releases) page.
 
+Make sure you have Node.js installed (version 16 or newer recommended)
+
 ### Building from Source
 
 1. Clone this repository:
 ```bash
 git clone https://github.com/jordcoerse/CTRL-ALT-FOCUS.git
-cd sauce-boss
+cd ctrl-alt-focus
 ```
 
 2. Install dependencies:
