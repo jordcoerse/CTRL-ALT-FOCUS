@@ -1,27 +1,43 @@
 {
-  "name": "pomodoro-app",
+  "name": "ctrl-alt-focus",
   "version": "1.0.0",
-  "description": "Pomodoro Timer Application",
+  "description": "CTRL+ALT+FOCUS - A Pomodoro Timer Application",
   "main": "main.js",
   "homepage": "./",
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "react-scripts build && node scripts/copy-sounds.js",
     "electron-start": "electron .",
     "dev": "concurrently \"cross-env BROWSER=none npm run start\" \"wait-on http://localhost:3000 && electron .\"",
     "electron-build": "electron-builder",
-    "dist": "npm run build && npm run electron-build"
+    "dist": "npm run build && npm run electron-build",
+    "generate-cert": "electron-builder create-self-signed-cert -p ctrlaltfocus"
   },
   "build": {
-    "appId": "com.ouwebaas.pomodoro",
-    "productName": "CTRL ALT FOCUS Pomodoro Timer",
+    "appId": "com.ouwebaas.ctrlaltfocus",
+    "productName": "CTRL ALT FOCUS",
     "files": [
       "build/**/*",
       "main.js",
       "node_modules/**/*"
     ],
     "directories": {
-      "buildResources": "assets"
+      "buildResources": "assets",
+      "output": "dist"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.ico",
+      "certificateFile": "certificates/ctrlaltfocus.pfx",
+      "certificatePassword": "",
+      "verifyUpdateCodeSignature": false,
+      "publisherName": "CTRL+ALT+FOCUS"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": false,
+      "deleteAppDataOnUninstall": true
     },
     "extraMetadata": {
       "main": "./main.js"
@@ -45,6 +61,7 @@
     "cross-env": "^7.0.3",
     "electron": "^24.1.2",
     "electron-builder": "^23.6.0",
+    "electron-forge": "^5.2.4",
     "tailwindcss": "^3.3.2",
     "wait-on": "^7.0.1"
   },

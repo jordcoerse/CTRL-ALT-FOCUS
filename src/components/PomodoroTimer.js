@@ -8,19 +8,38 @@ const PomodoroTimer = () => {
   const [time, setTime] = useState(25 * 60); // 25 minutes in seconds
   const [cycle, setCycle] = useState(1);
   const [showSettings, setShowSettings] = useState(false);
+  const [isFlashing, setIsFlashing] = useState(false);
   
   // Settings
   const [settings, setSettings] = useState({
     workTime: 25,
     shortBreakTime: 5,
     longBreakTime: 15,
-    cycles: 4
+    cycles: 4,
+    soundEnabled: true,
+    soundType: 'ping' // 'ping', 'ding', or 'sonar'
   });
 
   // Sound effect for timer completion
   const playSound = () => {
-    const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAAABMYXZjNTguMTMuMTAwAGRhdGFEBgAApHtwdnV5fYKBf314dHRyc3N5f4OIiYmHhYOAfXp4eHl8foGFh4iJiIaEgn57eXh3d3l7foGEhoeHh4WEgYB+fHt6ent9f4GEhYaGhYSDgYB+fHt7e3x+gIKEhYWFhYSEgoF/fXx7e3x+gIKDhISEhISDgoF/fnx8fH1+gIKDhISEhISDgoF/fnx8fH1+gIKDhISEhISDgoF/fn19fX5/gYKDg4ODg4KCgYB/fn19fX5/gYKDg4ODg4KCgYB/fn19fX9/gYKDg4ODg4KCgYB/fn19fX9/gYKDg4ODg4OCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==');
-    audio.play();
+    if (!settings.soundEnabled) return;
+    
+    const soundFiles = {
+      ping: './sound-ping-43757.mp3',
+      ding: './sound-din-ding-89718.mp3',
+      sonar: './sound-sonar-ping-290188.mp3'
+    };
+
+    const audio = new Audio(soundFiles[settings.soundType]);
+    audio.volume = 1.0; // Ensure volume is at maximum
+    audio.play().catch(error => {
+      console.error('Error playing sound:', error);
+    });
+  };
+
+  // Test sound function
+  const testSound = () => {
+    playSound();
   };
 
   // Timer logic
@@ -33,6 +52,12 @@ const PomodoroTimer = () => {
           if (prevTime <= 1) {
             clearInterval(interval);
             playSound();
+            setIsFlashing(true);
+            
+            // Stop flashing after 2 seconds
+            setTimeout(() => {
+              setIsFlashing(false);
+            }, 2000);
             
             // Cycle logic
             if (mode === 'work') {
@@ -102,10 +127,14 @@ const PomodoroTimer = () => {
 
   // Update settings
   const handleSettingChange = (setting, value) => {
-    setSettings({
-      ...settings,
-      [setting]: parseInt(value, 10)
-    });
+    setSettings(prevSettings => ({
+      ...prevSettings,
+      [setting]: setting === 'soundEnabled' 
+        ? value // boolean value for checkbox
+        : setting === 'soundType'
+          ? value // string value for sound type
+          : parseInt(value, 10) // numeric value for other settings
+    }));
   };
 
   // Apply settings
@@ -133,7 +162,7 @@ const PomodoroTimer = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
-      <div className={`w-full max-w-md rounded-xl shadow-xl overflow-hidden ${getBackgroundColor()} text-white transition-all duration-500`}>
+      <div className={`w-full max-w-md rounded-xl shadow-xl overflow-hidden ${getBackgroundColor()} text-white transition-all duration-500 ${isFlashing ? 'animate-flash' : ''}`}>
         {/* Header */}
         <div className="p-6 flex justify-between items-center">
           <h1 className="text-2xl font-bold">CTRL+ALT+FOCUS</h1>
@@ -198,6 +227,43 @@ const PomodoroTimer = () => {
                   className="w-full p-2 border rounded"
                 />
               </div>
+
+              <div className="col-span-2">
+                <div className="space-y-4">
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={settings.soundEnabled}
+                      onChange={(e) => handleSettingChange('soundEnabled', e.target.checked)}
+                      className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                    />
+                    <span className="text-sm font-medium">Enable Sound Notifications</span>
+                  </label>
+                  
+                  {settings.soundEnabled && (
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Sound Type</label>
+                        <select
+                          value={settings.soundType}
+                          onChange={(e) => handleSettingChange('soundType', e.target.value)}
+                          className="w-full p-2 border rounded"
+                        >
+                          <option value="ping">Ping</option>
+                          <option value="ding">Ding</option>
+                          <option value="sonar">Sonar</option>
+                        </select>
+                      </div>
+                      <button
+                        onClick={testSound}
+                        className="w-full p-2 bg-blue-600 text-white rounded font-medium hover:bg-blue-700 transition-colors"
+                      >
+                        Test Sound
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
             
             <button
@@ -235,7 +301,7 @@ const PomodoroTimer = () => {
             <div className="p-8 flex flex-col items-center">
               <div className="relative w-64 h-64 mb-8">
                 {/* Progress Circle */}
-                <svg className="w-full h-full" viewBox="0 0 100 100">
+                <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
                   <circle
                     cx="50"
                     cy="50"
@@ -254,50 +320,51 @@ const PomodoroTimer = () => {
                     strokeDasharray="283"
                     strokeDashoffset={283 - (283 * getProgress()) / 100}
                     strokeLinecap="round"
-                    transform="rotate(-90 50 50)"
                   />
                 </svg>
                 
                 {/* Timer Text */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-5xl font-bold">{formatTime(time)}</span>
-                  <span className="uppercase mt-2 font-medium">
+                  <span className="text-6xl font-bold tracking-tight">{formatTime(time)}</span>
+                  <span className="uppercase mt-2 font-medium text-sm tracking-wider">
                     {mode === 'work' ? 'Focus Time' : mode === 'shortBreak' ? 'Short Break' : 'Long Break'}
                   </span>
                 </div>
               </div>
               
               {/* Cycles */}
-              <div className="flex space-x-2 mb-4">
+              <div className="flex justify-center space-x-2 mb-8">
                 {Array.from({ length: settings.cycles }, (_, i) => (
                   <div
                     key={i}
-                    className={`w-3 h-3 rounded-full ${i < cycle - 1 ? 'bg-white' : 'bg-white bg-opacity-30'}`}
+                    className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${i < cycle - 1 ? 'bg-white' : 'bg-white bg-opacity-30'}`}
                   ></div>
                 ))}
               </div>
               
               {/* Controls */}
-              <div className="flex items-center space-x-8">
+              <div className="flex items-center justify-center space-x-12">
                 <button
                   onClick={resetTimer}
                   className="p-2 rounded-full hover:bg-white hover:bg-opacity-20 transition-colors"
                 >
-                  <RotateCcw size={28} />
+                  <RotateCcw size={24} />
                 </button>
                 
                 <button
                   onClick={toggleTimer}
-                  className="p-4 bg-white bg-opacity-20 rounded-full hover:bg-opacity-30 transition-colors"
+                  className="p-4 bg-white bg-opacity-20 rounded-full hover:bg-opacity-30 transition-colors flex items-center justify-center w-16 h-16"
                 >
-                  {isActive ? <PauseCircle size={48} /> : <PlayCircle size={48} />}
+                  {isActive ? <PauseCircle size={40} /> : <PlayCircle size={40} />}
                 </button>
                 
-                {mode === 'work' ? (
-                  <Coffee size={28} className="p-2" />
-                ) : (
-                  <Bell size={28} className="p-2" />
-                )}
+                <div className="p-2">
+                  {mode === 'work' ? (
+                    <Coffee size={24} />
+                  ) : (
+                    <Bell size={24} />
+                  )}
+                </div>
               </div>
             </div>
             
